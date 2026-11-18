@@ -50,7 +50,7 @@
         crowns.push({ x: lerp(-33, 33, r()), h, rx, rz, zc: h - rz });
       }
     };
-    if (tipo === 'floresta') { add(9, 24, 38, 4, 7, .38); add(10, 12, 22, 2.5, 4.5, .4); add(8, 4, 10, 1.5, 2.6, .5); }
+    if (tipo === 'floresta') { add(8, 24, 38, 3.5, 6, .38); add(6, 12, 22, 2.2, 4, .4); add(4, 4, 10, 1.5, 2.6, .5); }
     if (tipo === 'cerradao') { add(14, 7, 14, 2, 3.6, .5); add(6, 3, 6, 1.2, 2, .5); grass = .4; grassCover = .3; }
     if (tipo === 'cerrado') { add(6, 2.5, 6.5, 1, 2.4, .55); add(5, 1, 2.2, .6, 1.1, .6); grass = .6; grassCover = .7; }
     if (tipo === 'campo') { add(1, 1.2, 1.6, .7, 1, .7); grass = .7; grassCover = .95; }
@@ -68,17 +68,25 @@
         const ov = Math.max(0, Math.min(k.x + hw, 12.5) - Math.max(k.x - hw, -12.5));
         c += ov / 25 * .75;
       }
-      if (z > 0 && z < grass) c += grassCover * 1.6;
       cover[i] = c;
     }
-    const ret = new Float32Array(nb); let Tr = 1, T1 = null; const k = .9, rv = .45, rg = .32;
+    // fração da pegada que tem copa acima (vãos entre copas deixam a luz passar direto)
+    let nc = 0, nx = 0;
+    for (let x = -12.5; x <= 12.5; x += .25) { nx++; if (crowns.some(q => Math.abs(x - q.x) < q.rx * 1.15)) nc++; }
+    const CC = Math.max(1e-3, nc / nx);
+    const ret = new Float32Array(nb); let Tv = 1, gl = 0, T1 = null; const k = .5, rv = .45, rg = .32;
     for (let i = nb - 1; i >= 0; i--) {
       const z = zmin + (i + .5) * dz;
-      if (z < 1 && T1 === null) T1 = Tr;
       if (z < 0) break;
-      const inter = Tr * (1 - Math.exp(-k * cover[i] * dz));
-      ret[i] += inter * rv; Tr -= inter;
+      const inter = Tv * (1 - Math.exp(-k * cover[i] / CC * dz)); // dentro da área com copa
+      ret[i] += CC * inter * rv; Tv -= inter;
+      if (z < 1 && T1 === null) T1 = (1 - CC) + CC * Tv - gl;
+      if (z < grass) { // capim: camada contínua junto ao chão
+        const g2 = ((1 - CC) + CC * Tv - gl) * (1 - Math.exp(-k * grassCover * 1.6 * dz));
+        ret[i] += g2 * rv; gl += g2;
+      }
     }
+    const Tr = (1 - CC) + CC * Tv - gl;
     const gi = Math.round((0 - zmin) / dz);
     ret[gi] += Tr * rg;
     const sig = 1.0 / dz, wf = new Float32Array(nb);
@@ -125,7 +133,7 @@
         g.beginPath(); g.moveTo(X(k.x), Y(0)); g.lineTo(X(k.x), Y(k.zc)); g.stroke();
         const lit = inFoot && tt < 3.4 && zf < k.h + 1 && zf > k.zc - k.rz - 2 && tt < 1.3;
         g.fillStyle = lit ? C.leafHi : C.leaf; g.globalAlpha = inFoot ? .95 : .55;
-        g.beginPath(); g.ellipse(X(k.x), Y(k.zc), k.rx * (sceneW / 72), k.rz * pxm, 0, 0, 7); g.fill();
+        g.beginPath(); g.ellipse(X(k.x), Y(k.zc), Math.max(.5, k.rx * (sceneW / 72)), Math.max(.5, k.rz * pxm), 0, 0, 7); g.fill();
         g.globalAlpha = 1;
       }
       // satélite e feixe
@@ -178,7 +186,7 @@
         g.globalAlpha = 1;
       }
       // rodapé
-      label(g, `t = 2h / c  ·  1 m de altura ≈ 6,7 ns`, 12, h - 14, C.mute, MONO);
+      label(g, `t = 2h / c  ·  1 m de altura ≈ 6,7 ns`, 12, h - 32, C.mute, MONO_S);
       label(g, `${VEG[s.veg].nome}: RH98 ${fmt(Math.max(0, st.rh[98]))} m · cobertura acima de 1 m ≈ ${Math.round(st.coberturaDossel * 100)} %`, w - 12, h - 14, C.ink, MONO, 'right');
     }
   };
@@ -432,7 +440,7 @@
         const x = TX(tr.x), hh = th * tr.h;
         g.strokeStyle = C.trunk; g.lineWidth = 5; g.beginPath(); g.moveTo(x, gy); g.lineTo(x, gy - hh * .55); g.stroke();
         g.lineWidth = 2; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(x, gy - hh * (.45 + k * .1)); g.lineTo(x + (k % 2 ? 1 : -1) * tr.w * sw * .9, gy - hh * (.55 + k * .1)); g.stroke(); }
-        g.fillStyle = 'rgba(63,143,79,.8)'; g.beginPath(); g.ellipse(x, gy - hh * .8, tr.w * sw * 1.2, hh * .26, 0, 0, 7); g.fill();
+        g.fillStyle = 'rgba(63,143,79,.8)'; g.beginPath(); g.ellipse(x, gy - hh * .8, Math.max(.5, tr.w * sw * 1.2), Math.max(.5, hh * .26), 0, 0, 7); g.fill();
       });
       // feixe oblíquo
       const sx = 30, sy = 26; satIcon(g, sx + 14, sy, 13, C.radar);

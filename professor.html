@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atlas Orbital · Notas do professor</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23060a14'/%3E%3Ccircle cx='12' cy='12' r='5' fill='none' stroke='%23e9eff8' stroke-width='1.5'/%3E%3Cellipse cx='12' cy='12' rx='10' ry='3.8' transform='rotate(-28 12 12)' fill='none' stroke='%23e9eff8' stroke-width='1.2'/%3E%3Ccircle cx='20' cy='7.8' r='1.6' fill='%23ffc94a'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="assets/marca/favicon.png">
+<meta property="og:image" content="https://bonnexd01.github.io/atlas-orbital/assets/marca/banner.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Sora:wght@500;600;700&display=swap">
@@ -62,7 +63,8 @@ dl.glos dt { font-weight: 600; }
 dl.glos dd { margin: 0; color: var(--mute); min-width: 0; }
 ol.fontes { font-size: 14px; padding-left: 22px; }
 ol.fontes li { margin: 6px 0; overflow-wrap: anywhere; }
-footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font: 500 12px var(--f-mono); color: var(--mute); letter-spacing: .06em; }
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font: 500 12px var(--f-mono); color: var(--mute); letter-spacing: .06em;  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+footer img { display: block; width: 200px; height: auto; }
 @media (max-width: 560px) { ol.roteiro li { grid-template-columns: 30px 1fr; } ol.roteiro li span { grid-column: 2; } dl.glos { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -206,7 +208,13 @@ footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line);
   <li>Texturas da Terra: NASA Blue Marble e Black Marble (domínio público), nas versões distribuídas com o pacote three-globe.</li>
 </ol>
 
-<footer>Atlas Orbital · Canopy Forest · Cerrado · dados conferidos em 18 nov 2026</footer>
+<footer>
+  <picture>
+    <source srcset="assets/marca/assinatura_clara.png" media="(prefers-color-scheme: dark)">
+    <img src="assets/marca/assinatura_escura.png" alt="Canopy Forest · Cerrado" width="200" height="62">
+  </picture>
+  <span>Atlas Orbital · dados conferidos em 18 nov 2026</span>
+</footer>
 </main>
 </body>
 </html>

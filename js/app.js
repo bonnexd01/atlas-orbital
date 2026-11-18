@@ -311,7 +311,7 @@
         <h1 class="capa">${esc(s.h)}</h1><p class="sub">${esc(s.sub)}</p><p>${s.p}</p>
         <button class="go" type="button" data-next>Começar a aula</button>
         <p class="dica">${esc(s.dica)}</p>
-        <p class="credito">Canopy Forest · Cerrado</p>`;
+        <p class="credito"><img src="assets/marca/assinatura_clara.png" alt="Canopy Forest · Cerrado" width="168" height="52"></p>`;
     } else {
       const chip = sat ? `<span class="chip" style="--c:${sat.cor}">${esc(TIPOS[sat.tipo].nome)}</span>` : (cap.kicker ? `<span class="chip" style="--c:var(--foco)">${esc(cap.kicker)}</span>` : '');
       h += `<div class="eyebrow">${chip}<span>Cap. ${s.ci} · ${esc(s.rotulo)}${total > 1 ? ` · ${s.pi + 1}/${total}` : ''}</span></div>`;
@@ -558,7 +558,10 @@
     updateSatLabels(); updatePartLabels(); updateAnnotations();
     if (lab) {
       const r = labC.getBoundingClientRect();
-      lab.L.draw(labG, r.width, r.height, clock, lab.state, lab.sat);
+      if (r.width > 40 && r.height > 40) {
+        try { lab.L.draw(labG, r.width, r.height, clock, lab.state, lab.sat); }
+        catch (e) { if (!lab.erro) { lab.erro = true; console.warn('laboratório:', e.message); } }
+      }
     }
   }
 
