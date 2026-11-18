@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atlas Orbital · Notas do professor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23060a14'/%3E%3Ccircle cx='12' cy='12' r='5' fill='none' stroke='%23e9eff8' stroke-width='1.5'/%3E%3Cellipse cx='12' cy='12' rx='10' ry='3.8' transform='rotate(-28 12 12)' fill='none' stroke='%23e9eff8' stroke-width='1.2'/%3E%3Ccircle cx='20' cy='7.8' r='1.6' fill='%23ffc94a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Sora:wght@500;600;700&display=swap">
+<style>
+/* Layout: coluna de leitura de ~72ch com tabela larga rolável; cores codificam o tipo de sensor como na aula. */
+:root {
+  --bg: #f4f6fa; --paper: #ffffff; --ink: #121a2a; --mute: #55627a; --line: #d9dfea; --soft: #eef2f8;
+  --laser: #d4471d; --verde: #0f9a55; --luz: #b07a00; --radar: #7b4fd6; --foco: #1f5fbf;
+  --f-disp: 'Sora', 'Segoe UI', system-ui, sans-serif; --f-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; --f-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #070b15; --paper: #0d1526; --ink: #e8eef7; --mute: #97a6bd; --line: #233150; --soft: #111c33;
+  --laser: #ff7a52; --verde: #5dff9a; --luz: #ffc94a; --radar: #c49bff; --foco: #9fd3ff; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #070b15; --paper: #0d1526; --ink: #e8eef7; --mute: #97a6bd; --line: #233150; --soft: #111c33;
+  --laser: #ff7a52; --verde: #5dff9a; --luz: #ffc94a; --radar: #c49bff; --foco: #9fd3ff; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.62 var(--f-body); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+main { max-width: 900px; margin: 0 auto; padding-block: 48px 80px; }
+header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 32px; }
+.kick { font: 600 12px var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--mute); }
+a.btn { font: 600 14px var(--f-body); color: var(--paper); background: var(--ink); padding: 9px 16px; border-radius: 99px; text-decoration: none; }
+a.btn:hover { opacity: .88; }
+h1 { font: 700 clamp(32px, 5vw, 46px)/1.06 var(--f-disp); letter-spacing: -.02em; margin: 0 0 12px; text-wrap: balance; }
+h2 { font: 600 24px/1.2 var(--f-disp); margin: 48px 0 12px; text-wrap: balance; }
+h3 { font: 600 18px/1.3 var(--f-disp); margin: 28px 0 8px; display: flex; align-items: center; gap: 10px; }
+h3 i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+p, li { max-width: 72ch; }
+.lead { font-size: 18px; color: var(--mute); }
+a { color: var(--foco); }
+code, kbd { font: 500 13px var(--f-mono); background: var(--soft); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin: 16px 0; }
+.box h4 { margin: 0 0 6px; font: 600 11px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.box ul, .box ol { margin: 0; padding-left: 20px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.grid2 .box { margin: 0; }
+ol.roteiro { padding-left: 0; list-style: none; counter-reset: r; display: grid; gap: 8px; }
+ol.roteiro li { counter-increment: r; display: grid; grid-template-columns: 36px 64px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed var(--line); max-width: none; }
+ol.roteiro li::before { content: counter(r, decimal-leading-zero); font: 600 13px var(--f-mono); color: var(--mute); }
+ol.roteiro b.t { font: 600 13px var(--f-mono); color: var(--foco); font-variant-numeric: tabular-nums; }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); background: var(--soft); position: sticky; top: 0; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+td { font-variant-numeric: tabular-nums; }
+.tag { display: inline-block; font: 600 10px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; border: 1px solid currentColor; }
+.lidar { color: var(--laser); } .optico { color: var(--luz); } .radar { color: var(--radar); }
+dl.qa { margin: 8px 0 0; }
+dl.qa dt { font-weight: 600; margin-top: 12px; }
+dl.qa dd { margin: 4px 0 0; color: var(--mute); max-width: 72ch; }
+.simp { font-size: 14px; color: var(--mute); border-left: 3px solid var(--line); padding-left: 12px; margin: 10px 0; }
+dl.glos { display: grid; grid-template-columns: minmax(150px, max-content) 1fr; gap: 8px 18px; }
+dl.glos dt { font-weight: 600; }
+dl.glos dd { margin: 0; color: var(--mute); min-width: 0; }
+ol.fontes { font-size: 14px; padding-left: 22px; }
+ol.fontes li { margin: 6px 0; overflow-wrap: anywhere; }
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font: 500 12px var(--f-mono); color: var(--mute); letter-spacing: .06em; }
+@media (max-width: 560px) { ol.roteiro li { grid-template-columns: 30px 1fr; } ol.roteiro li span { grid-column: 2; } dl.glos { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <span class="kick">Atlas Orbital · Professor</span>
+  <a class="btn" href="index.html">Abrir a aula</a>
+</header>
+
+<h1>Notas do professor</h1>
+<p class="lead">Atlas Orbital é uma aula interativa de sensoriamento remoto da vegetação para a graduação em Geografia. Oito satélites reais orbitam uma Terra 3D. Em cada capítulo o satélite se abre para mostrar as peças, um laboratório animado explica o princípio físico, e o último passo mostra o dado que chega ao usuário.</p>
+
+<div class="grid2">
+  <div class="box"><h4>Público e duração</h4>Graduação em Geografia, disciplina de Sensoriamento Remoto. Duas aulas de 50 min, ou uma de 100 min com o desafio no fim.</div>
+  <div class="box"><h4>Como apresentar</h4><kbd>→</kbd> e <kbd>←</kbd> avançam e voltam; o passador de slides (<kbd>Page Down</kbd>) também funciona. <kbd>M</kbd> abre os capítulos. Arraste para girar a cena e use a roda para aproximar. Na visão geral, clique em um satélite para ir ao capítulo dele.</div>
+  <div class="box"><h4>Sem internet</h4>Copie a pasta inteira e abra <code>index.html</code> no Chrome ou no Edge. Texturas e Three.js estão na pasta; só as fontes vêm da internet e, sem ela, o navegador usa fontes do sistema.</div>
+</div>
+
+<h2>Objetivos de aprendizagem</h2>
+<ul>
+  <li>Distinguir sensores passivos (ópticos) de ativos (lidar e radar) pela fonte de energia e pelo que cada um mede.</li>
+  <li>Relacionar a órbita (heliossíncrona ou da ISS) à cobertura, à hora de passagem e à revisita.</li>
+  <li>Explicar como um lidar de forma de onda obtém a altura do dossel (RH98) e como um lidar de contagem de fótons separa solo, dossel e ruído.</li>
+  <li>Ler uma curva de reflectância da vegetação e justificar o NDVI, a borda do vermelho e o NBR.</li>
+  <li>Comparar as bandas de radar X, C, S, L e P quanto à penetração na copa, aos mecanismos de retroespalhamento e à saturação com a biomassa.</li>
+  <li>Descrever como mapas de altura do dossel combinam amostras de lidar com imagens contínuas, e avaliar os limites desses mapas no Cerrado.</li>
+</ul>
+
+<h2>Roteiro sugerido</h2>
+<ol class="roteiro">
+  <li><b class="t">10 min</b><span><b>Abertura e A Terra vista de cima.</b> Pergunte quem já usou uma imagem de satélite e de qual satélite ela veio. Use o passo das órbitas para mostrar o limite de 51,6° do GEDI.</span></li>
+  <li><b class="t">20 min</b><span><b>Lidar: GEDI e ICESat-2.</b> No laboratório do GEDI, compare Floresta tropical e Cerrado típico. Peça para a turma prever a forma da curva antes de trocar.</span></li>
+  <li><b class="t">25 min</b><span><b>Ópticos: Landsat 9, Sentinel-2, Amazonia-1.</b> Troque para a estação seca e mostre o pivô irrigado verde no meio do cerrado seco. Compare o tamanho do pixel nos três.</span></li>
+  <li><b class="t">25 min</b><span><b>Radar: Sentinel-1, NISAR, BIOMASS.</b> Use o mesmo laboratório nos três e alterne as bandas C, L e P. Destaque o duplo salto e a saturação.</span></li>
+  <li><b class="t">10 min</b><span><b>Modelos de dossel.</b> Termine com o mapa de erro e discuta como validar no Cerrado.</span></li>
+  <li><b class="t">10 min</b><span><b>Desafio.</b> Em duplas, a turma escolhe o sensor para cada situação antes de você clicar.</span></li>
+</ol>
+
+<h2>Os oito satélites</h2>
+<div class="tw"><table>
+<thead><tr><th>Satélite</th><th>Tipo</th><th>Agência</th><th>Lançamento</th><th>Órbita</th><th>Sensor</th><th>Resolução</th><th>Faixa</th><th>Revisita</th><th>Para a vegetação</th></tr></thead>
+<tbody>
+<tr><td>GEDI</td><td><span class="tag lidar">Lidar</span></td><td>NASA · UMD</td><td>dez 2018</td><td>ISS, ~420 km, 51,6°</td><td>Lidar de forma de onda, 1064 nm, 3 lasers</td><td>pegada ~25 m, a cada 60 m</td><td>8 trilhas em ~4,2 km</td><td>amostral</td><td>RH98, cobertura, PAI, biomassa L4A/L4B</td></tr>
+<tr><td>ICESat-2</td><td><span class="tag lidar">Lidar</span></td><td>NASA</td><td>set 2018</td><td>~496 km, 92°</td><td>ATLAS, contagem de fótons, 532 nm</td><td>pegada ~11 m, a cada 0,7 m</td><td>6 feixes em 3 pares</td><td>91 dias</td><td>ATL08: terreno e altura do dossel</td></tr>
+<tr><td>Landsat 9</td><td><span class="tag optico">Óptico</span></td><td>NASA · USGS</td><td>set 2021</td><td>705 km, heliossíncrona</td><td>OLI-2 (9 bandas) e TIRS-2 (2 termais)</td><td>30 m (15 m pan, 100 m termal)</td><td>185 km</td><td>16 dias (8 com L8)</td><td>Séries desde 1972, NDVI, NBR, temperatura</td></tr>
+<tr><td>Sentinel-2</td><td><span class="tag optico">Óptico</span></td><td>ESA · Copernicus</td><td>2015, 2017, 2024</td><td>786 km, heliossíncrona</td><td>MSI, 13 bandas</td><td>10, 20 e 60 m</td><td>290 km</td><td>5 dias</td><td>Borda do vermelho, fenologia, fogo</td></tr>
+<tr><td>Amazonia-1</td><td><span class="tag optico">Óptico</span></td><td>INPE · AEB</td><td>fev 2021</td><td>~752 km, heliossíncrona</td><td>WFI, 4 bandas</td><td>~60 m</td><td>~850 km</td><td>5 dias</td><td>Alertas de desmatamento (DETER)</td></tr>
+<tr><td>Sentinel-1</td><td><span class="tag radar">Radar</span></td><td>ESA · Copernicus</td><td>2014, 2024, 2025</td><td>693 km, heliossíncrona</td><td>SAR banda C (5,405 GHz)</td><td>5 × 20 m (IW)</td><td>250 km</td><td>12 dias por satélite</td><td>Desmatamento sob nuvens, umidade</td></tr>
+<tr><td>NISAR</td><td><span class="tag radar">Radar</span></td><td>NASA · ISRO</td><td>jul 2025</td><td>747 km, heliossíncrona</td><td>SAR bandas L e S, refletor de 12 m</td><td>varia com o modo</td><td>~242 km</td><td>12 dias</td><td>Biomassa até ~100 Mg/ha, deformação</td></tr>
+<tr><td>BIOMASS</td><td><span class="tag radar">Radar</span></td><td>ESA</td><td>abr 2025</td><td>~666 km, heliossíncrona</td><td>SAR banda P (435 MHz), refletor de 12 m</td><td>produtos de ~200 m</td><td>~50 km</td><td>varia por fase</td><td>Biomassa, altura (tomografia), perturbação</td></tr>
+</tbody></table></div>
+<p class="simp">A faixa do BIOMASS e a resolução do NISAR variam com o modo e a fase da missão; confira o documento da missão antes de usar em prova.</p>
+
+<h2>Notas por capítulo</h2>
+
+<h3><i style="background:var(--laser)"></i>GEDI</h3>
+<dl class="qa">
+  <dt>Por que se usa RH98 como altura do dossel, e não RH100?</dt>
+  <dd>O RH100 depende do primeiro sinal acima do ruído: um único galho emergente ou um pico de ruído muda o valor. O RH98 descarta os 2 % mais altos da energia acumulada e é mais estável entre pegadas vizinhas.</dd>
+  <dt>Pergunta extra</dt>
+  <dd>Por que a forma de onda do Cerrado típico tem um pico de chão tão alto? Porque a copa intercepta pouca energia, e a maior parte do pulso chega ao solo.</dd>
+</dl>
+<p class="simp"><b>O que o laboratório simplifica:</b> copas como elipses, transmissão pela lei de Beer-Lambert com coeficiente fixo, reflectâncias fixas de folha e solo, pulso gaussiano de ~1 m, terreno plano (no terreno inclinado o eco do chão se alarga), e cobertura calculada acima de 1 m.</p>
+
+<h3><i style="background:var(--verde)"></i>ICESat-2</h3>
+<dl class="qa">
+  <dt>O Sol emite mais luz perto de 500 nm. Por que isso pesa mais para o ICESat-2 (532 nm) do que para o GEDI (1064 nm)?</dt>
+  <dd>A irradiância solar em 532 nm é bem maior que em 1064 nm, e o detector do ICESat-2 conta fótons isolados. De dia, a luz solar refletida gera muitos fótons verdes falsos. O GEDI grava a energia total do eco e trabalha numa faixa com menos luz solar.</dd>
+</dl>
+<p class="simp"><b>O que o laboratório simplifica:</b> as taxas de fótons por pulso são ilustrativas (forte ≈ 4× o fraco, como na missão). A classificação usa a classe verdadeira de cada fóton; o ATL08 real usa filtragem de ruído e ajuste de superfície.</p>
+
+<h3><i style="background:var(--luz)"></i>Landsat 9, Sentinel-2 e Amazonia-1</h3>
+<dl class="qa">
+  <dt>Mesmo com Landsat 8 e 9 juntos (8 dias), por que ainda é difícil acompanhar as queimadas no Cerrado?</dt>
+  <dd>O capim rebrota em poucas semanas e a cicatriz some; nuvens e fumaça escondem datas; e o fogo ativo dura horas. Por isso se combinam focos de calor de sensores de alta revisita (MODIS, VIIRS, GOES) com Sentinel-2 e Landsat para a área queimada.</dd>
+  <dt>Que par de bandas destaca cicatrizes de fogo?</dt>
+  <dd>Infravermelho próximo e infravermelho de ondas curtas: no Sentinel-2, B8 (ou B8A) e B12. NBR = (NIR − SWIR2) / (NIR + SWIR2); a queima derruba o NIR e aumenta o SWIR.</dd>
+  <dt>Por que um sensor não costuma ter 850 km de faixa e 10 m de pixel ao mesmo tempo?</dt>
+  <dd>Seriam 85 mil pixels por linha em cada banda. O número de detectores, a óptica de campo largo e, sobretudo, o volume de dados a gravar e transmitir crescem muito; o sistema fica caro e pesado.</dd>
+</dl>
+<p class="simp"><b>O que o laboratório simplifica:</b> a paisagem é sintética (mata de galeria, cerrado, campo, pivô, lavoura, estrada). As curvas espectrais são formas típicas aproximadas, não medidas de biblioteca; as classes são misturas lineares de vegetação verde, seca, solo e água; não há atmosfera.</p>
+
+<h3><i style="background:var(--radar)"></i>Sentinel-1, NISAR e BIOMASS</h3>
+<dl class="qa">
+  <dt>Por que o radar vê através da nuvem e o Sentinel-2 não?</dt>
+  <dd>As gotas de nuvem têm de 10 a 20 µm. Para micro-ondas de centímetros, elas são minúsculas e quase não espalham. A luz visível e o infravermelho (0,4 a 2,5 µm) têm tamanho comparável às gotas e são espalhados.</dd>
+  <dt>Por que duas passagens com 12 dias de diferença revelam o desmatamento?</dt>
+  <dd>Com a mesma geometria de visada, a mudança no retroespalhamento e a perda de coerência entre as duas datas indicam que a estrutura da floresta mudou, com ou sem nuvem.</dd>
+  <dt>Se a banda P atravessa tão bem a floresta, por que não usá-la em todos os radares?</dt>
+  <dd>Exige antenas enormes para uma resolução razoável, sofre distorção da ionosfera (rotação de Faraday), tem pouca largura de banda permitida e divide a faixa com radares de rastreamento espacial, o que obriga a restringir as áreas imageadas.</dd>
+</dl>
+<p class="simp"><b>O que o laboratório simplifica:</b> as proporções de volume, duplo salto e superfície, a penetração e os pontos de saturação são ordens de grandeza para comparar bandas. Na realidade dependem da polarização, do ângulo de incidência, da umidade e da estrutura da vegetação.</p>
+
+<h3><i style="background:var(--foco)"></i>Modelos de dossel</h3>
+<dl class="qa">
+  <dt>Num estudo de carbono no Cerrado, que dado de campo você coletaria para validar um desses mapas?</dt>
+  <dd>Parcelas com diâmetro (DAP) e altura de todas as árvores, posição precisa por GNSS, e de preferência lidar de drone ou aerotransportado na mesma época. Estratifique entre campo, cerrado típico, cerradão e mata de galeria.</dd>
+</dl>
+<p class="simp"><b>O que o laboratório simplifica:</b> a rede é um esquema. O mapa previsto é sintético e reproduz os vieses relatados na literatura: subestima árvores altas e superestima vegetação baixa.</p>
+
+<h3>Cena 3D</h3>
+<p class="simp">As altitudes das órbitas estão em escala real. Os satélites estão muito ampliados e são modelos esquemáticos, não desenhos de engenharia. As posições nas órbitas e os planos orbitais são ilustrativos e o tempo está acelerado. Ao abrir um satélite, ele é levado para cima do Cerrado.</p>
+
+<h2>Glossário</h2>
+<dl class="glos">
+  <dt>Pegada (footprint)</dt><dd>Área iluminada por um pulso de lidar no chão.</dd>
+  <dt>Forma de onda</dt><dd>Energia do eco registrada em função do tempo de retorno, convertida em altura.</dd>
+  <dt>RH (relative height)</dt><dd>Altura, acima do chão, em que se acumula uma dada porcentagem da energia do eco. RH98 ≈ altura do dossel.</dd>
+  <dt>Órbita heliossíncrona</dt><dd>Órbita quase polar que passa sobre cada lugar na mesma hora solar local.</dd>
+  <dt>Pushbroom</dt><dd>Sensor com uma linha de detectores que forma a imagem com o avanço do satélite.</dd>
+  <dt>Borda do vermelho</dt><dd>Subida abrupta da reflectância da folha entre ~690 e ~750 nm.</dd>
+  <dt>NDVI</dt><dd>(NIR − R) / (NIR + R). Índice de vegetação pelo contraste entre o vermelho e o infravermelho próximo.</dd>
+  <dt>NBR</dt><dd>(NIR − SWIR2) / (NIR + SWIR2). Índice de queimada.</dd>
+  <dt>SAR</dt><dd>Radar de abertura sintética: usa o movimento do satélite para simular uma antena longa e ganhar resolução.</dd>
+  <dt>Retroespalhamento</dt><dd>Fração da energia do radar que volta na direção do satélite.</dd>
+  <dt>Duplo salto</dt><dd>Retorno do radar que reflete no tronco e no chão, formando um diedro.</dd>
+  <dt>Interferometria</dt><dd>Comparação da fase entre passagens para medir deformação ou altura.</dd>
+  <dt>Tomografia SAR</dt><dd>Várias passagens com geometria ligeiramente diferente para reconstruir a estrutura vertical.</dd>
+  <dt>SweepSAR</dt><dd>Técnica do NISAR que varre o feixe na recepção para obter faixa larga com boa resolução.</dd>
+</dl>
+
+<h2>Fontes</h2>
+<ol class="fontes">
+  <li>GEDI, Universidade de Maryland: <a href="https://gedi.umd.edu/">gedi.umd.edu</a>; linha do tempo da missão (hibernação de mar/2023 a abr/2024).</li>
+  <li>NASA Earthdata, projeto GEDI e produtos versão 3 (jul/2026): <a href="https://www.earthdata.nasa.gov/data/projects/gedi">earthdata.nasa.gov/data/projects/gedi</a>.</li>
+  <li>eoPortal, ISS: GEDI: <a href="https://www.eoportal.org/satellite-missions/iss-gedi">eoportal.org/satellite-missions/iss-gedi</a>.</li>
+  <li>Dubayah, R. et al. (2020). The Global Ecosystem Dynamics Investigation: high-resolution laser ranging of the Earth's forests and topography. <i>Science of Remote Sensing</i>, 1, 100002.</li>
+  <li>ICESat-2, NASA: <a href="https://icesat-2.gsfc.nasa.gov/">icesat-2.gsfc.nasa.gov</a>. Markus, T. et al. (2017). <i>Remote Sensing of Environment</i>, 190, 260–273.</li>
+  <li>Neuenschwander, A.; Pitts, K. (2019). The ATL08 land and vegetation product for the ICESat-2 mission. <i>Remote Sensing of Environment</i>, 221, 247–259.</li>
+  <li>Landsat 9, NASA: <a href="https://landsat.gsfc.nasa.gov/satellites/landsat-9/">landsat.gsfc.nasa.gov/satellites/landsat-9</a>; USGS: <a href="https://www.usgs.gov/landsat-missions/landsat-9">usgs.gov/landsat-missions/landsat-9</a>.</li>
+  <li>Sentinel-2, Copernicus SentiWiki: <a href="https://sentiwiki.copernicus.eu/web/s2-mission">sentiwiki.copernicus.eu/web/s2-mission</a>. Drusch, M. et al. (2012). <i>Remote Sensing of Environment</i>, 120, 25–36.</li>
+  <li>Amazonia-1, INPE: página da missão no portal do INPE (<a href="https://www.gov.br/inpe/">gov.br/inpe</a>) e catálogo de imagens do INPE.</li>
+  <li>Sentinel-1, Copernicus SentiWiki: <a href="https://sentiwiki.copernicus.eu/web/s1-mission">sentiwiki.copernicus.eu/web/s1-mission</a>. Torres, R. et al. (2012). <i>Remote Sensing of Environment</i>, 120, 9–24.</li>
+  <li>NISAR, NASA/JPL: <a href="https://nisar.jpl.nasa.gov/">nisar.jpl.nasa.gov</a>; NASA Science: <a href="https://science.nasa.gov/mission/nisar/">science.nasa.gov/mission/nisar</a>; ISRO, GSLV-F16/NISAR: <a href="https://www.isro.gov.in/ISRO_EN/Mission_GSLVF16_NISAR_Home.html">isro.gov.in</a>; eoPortal: <a href="https://www.eoportal.org/satellite-missions/nisar">eoportal.org/satellite-missions/nisar</a>.</li>
+  <li>BIOMASS, ESA: <a href="https://www.esa.int/Applications/Observing_the_Earth/FutureEO/Biomass">esa.int · Biomass</a>; DLR (2025), primeiras imagens em banda P. Quegan, S. et al. (2019). The European Space Agency BIOMASS mission. <i>Remote Sensing of Environment</i>, 227, 44–60.</li>
+  <li>Potapov, P. et al. (2021). Mapping global forest canopy height through integration of GEDI and Landsat data. <i>Remote Sensing of Environment</i>, 253, 112165.</li>
+  <li>Lang, N. et al. (2023). A high-resolution canopy height model of the Earth. <i>Nature Ecology &amp; Evolution</i>, 7, 1778–1789.</li>
+  <li>Tolan, J. et al. (2024). Very high resolution canopy height maps from RGB imagery using self-supervised vision transformer and convolutional decoder trained on aerial lidar. <i>Remote Sensing of Environment</i>, 300, 113888. WRI: <a href="https://www.wri.org/outcomes/new-ai-model-maps-every-tree-earth">wri.org</a>.</li>
+  <li>MapBiomas: <a href="https://mapbiomas.org">mapbiomas.org</a>. PRODES e DETER (INPE): <a href="https://terrabrasilis.dpi.inpe.br">terrabrasilis.dpi.inpe.br</a>.</li>
+  <li>Texturas da Terra: NASA Blue Marble e Black Marble (domínio público), nas versões distribuídas com o pacote three-globe.</li>
+</ol>
+
+<footer>Atlas Orbital · Canopy Forest · Cerrado · dados conferidos em 18 nov 2026</footer>
+</main>
+</body>
+</html>

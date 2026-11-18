@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atlas Orbital</title>
+<meta name="description" content="Aula interativa de sensoriamento remoto: oito satélites reais em órbita de uma Terra 3D, cada um se abre e mostra como mede a vegetação.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23060a14'/%3E%3Ccircle cx='12' cy='12' r='5' fill='none' stroke='%23e9eff8' stroke-width='1.5'/%3E%3Cellipse cx='12' cy='12' rx='10' ry='3.8' transform='rotate(-28 12 12)' fill='none' stroke='%23e9eff8' stroke-width='1.2'/%3E%3Ccircle cx='20' cy='7.8' r='1.6' fill='%23ffc94a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Sora:wght@500;600;700&display=swap">
+<style>
+/* Layout: cena 3D em tela cheia; cartão da aula à esquerda, laboratório à direita, navegação em pílula embaixo.
+   Visual único escuro (espaço) por escolha. Cores codificam a física: laser IR, laser verde, luz solar, micro-ondas. */
+:root {
+  --space: #060a14;
+  --panel: rgba(9, 15, 29, .86);
+  --panel-solid: #0b1325;
+  --line: rgba(148, 172, 214, .2);
+  --line-strong: rgba(148, 172, 214, .38);
+  --ink: #e9eff8;
+  --mute: #95a5bd;
+  --dim: #64738c;
+  --laser: #ff6a3d;
+  --verde: #5dff9a;
+  --luz: #ffc94a;
+  --radar: #c49bff;
+  --foco: #9fd3ff;
+  --f-disp: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--space); color: var(--ink); font-family: var(--f-body); font-size: 15px; overflow: hidden; -webkit-font-smoothing: antialiased; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#lines { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#lines polyline { fill: none; stroke: var(--line-strong); stroke-width: 1; transition: stroke .2s; }
+#lines polyline.hi { stroke: var(--foco); stroke-width: 1.5; }
+#lines circle { fill: var(--foco); }
+#labels { position: fixed; inset: 0; pointer-events: none; }
+.satlbl { position: absolute; left: 0; top: 0; pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border: 1px solid var(--line); border-radius: 99px; background: rgba(6, 10, 20, .72); color: var(--ink); font: 500 11px/1.2 var(--f-mono); letter-spacing: .02em; cursor: pointer; white-space: nowrap; }
+.satlbl:hover, .satlbl:focus-visible { border-color: var(--line-strong); background: rgba(20, 30, 54, .9); outline: none; }
+.satlbl i { width: 7px; height: 7px; border-radius: 50%; }
+.plbl { position: absolute; left: 0; top: 0; pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; padding: 4px 9px 4px 4px; background: rgba(6, 10, 20, .82); border: 1px solid var(--line); border-radius: 6px; font: 500 12px/1.2 var(--f-body); white-space: nowrap; transition: border-color .2s, background .2s; opacity: 0; }
+.plbl b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; background: var(--foco); color: #06101f; font: 600 11px var(--f-mono); }
+.plbl.hi { border-color: var(--foco); background: rgba(18, 34, 64, .95); }
+.ann { position: absolute; left: 0; top: 0; font: 500 11px var(--f-mono); color: var(--ink); background: rgba(6, 10, 20, .7); border-left: 2px solid var(--foco); padding: 3px 7px; white-space: nowrap; }
+
+/* topo */
+#top { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); pointer-events: none; }
+.brand { font: 600 12px var(--f-mono); letter-spacing: .22em; text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+.brand svg { width: 22px; height: 22px; }
+.brand small { color: var(--dim); letter-spacing: .08em; font-weight: 500; }
+#top button { pointer-events: auto; }
+.iconbtn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--panel); color: var(--mute); font: 500 12px var(--f-mono); cursor: pointer; }
+.iconbtn:hover { color: var(--ink); border-color: var(--line-strong); }
+.iconbtn svg { width: 15px; height: 15px; }
+
+/* cartão */
+#card { position: fixed; left: max(20px, env(safe-area-inset-left)); top: 64px; width: min(410px, calc(100vw - 40px)); max-height: calc(100% - 150px); overflow: auto; padding: 22px 22px 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+#card.in > * { animation: rise .55s cubic-bezier(.2, .7, .2, 1) both; }
+#card.in > *:nth-child(2) { animation-delay: .04s; } #card.in > *:nth-child(3) { animation-delay: .08s; } #card.in > *:nth-child(4) { animation-delay: .12s; } #card.in > *:nth-child(n+5) { animation-delay: .16s; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 500 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin-bottom: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 99px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+#card h1.capa { font: 700 clamp(34px, 4.4vw, 52px)/1.02 var(--f-disp); letter-spacing: -.02em; margin: 2px 0 6px; text-wrap: balance; }
+#card .sub { font: 500 18px/1.3 var(--f-disp); color: var(--luz); margin: 0 0 14px; }
+#card h2 { font: 600 23px/1.18 var(--f-disp); letter-spacing: -.01em; margin: 0 0 10px; text-wrap: balance; }
+#card p { margin: 0 0 12px; line-height: 1.58; color: #d3dcea; }
+#card p b { color: var(--ink); font-weight: 600; }
+.dica { font-size: 13px; color: var(--mute) !important; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 4px !important; }
+.credito { font: 500 11px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim) !important; margin: 14px 0 0 !important; }
+dl.fatos { display: grid; grid-template-columns: minmax(96px, auto) 1fr; gap: 7px 14px; margin: 14px 0 12px; padding: 12px 0 0; border-top: 1px solid var(--line); font-size: 13px; }
+dl.fatos dt { font: 500 11px/1.5 var(--f-mono); color: var(--mute); text-transform: uppercase; letter-spacing: .05em; }
+dl.fatos dd { margin: 0; line-height: 1.45; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 0; }
+ol.partes { list-style: none; counter-reset: p; padding: 0; margin: 12px 0; display: grid; gap: 4px; }
+ol.partes li { counter-increment: p; display: grid; grid-template-columns: 22px 1fr; column-gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: default; transition: background .15s; outline: none; }
+ol.partes li::before { content: counter(p); grid-row: span 2; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 4px; background: rgba(159, 211, 255, .14); color: var(--foco); font: 600 11px var(--f-mono); }
+ol.partes li b { font-size: 14px; font-weight: 600; }
+ol.partes li span { font-size: 13px; color: var(--mute); line-height: 1.4; }
+ol.partes li:hover, ol.partes li.hi, ol.partes li:focus-visible { background: rgba(159, 211, 255, .08); }
+ol.partes li.hi::before { background: var(--foco); color: #06101f; }
+.ask { margin: 14px 0 10px; padding: 12px 14px; border-radius: 10px; background: rgba(255, 201, 74, .07); border: 1px solid rgba(255, 201, 74, .25); font-size: 14px; line-height: 1.5; }
+.ask span { display: block; font: 600 10px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--luz); margin-bottom: 4px; }
+ul.legenda { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+ul.legenda li { display: grid; grid-template-columns: 28px 1fr; column-gap: 10px; font-size: 13px; }
+ul.legenda li b { font-size: 14px; }
+ul.legenda li span { grid-column: 2; color: var(--mute); line-height: 1.4; }
+.sw { grid-row: span 2; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); }
+.sw.lidar { background: linear-gradient(135deg, var(--laser) 50%, var(--verde) 50%); }
+.sw.optico { background: var(--luz); }
+.sw.radar { background: var(--radar); }
+button.go, button.again { font: 600 13px var(--f-body); border-radius: 99px; cursor: pointer; padding: 9px 16px; margin: 4px 0 10px; }
+button.go { background: var(--ink); color: #08101e; border: 0; }
+button.go:hover { background: #fff; }
+button.again { background: transparent; color: var(--foco); border: 1px solid rgba(159, 211, 255, .35); }
+button.again:hover { background: rgba(159, 211, 255, .08); }
+button:focus-visible, .satlbl:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+/* quiz */
+.quiz { margin-top: 8px; }
+.qn { font: 500 11px var(--f-mono); color: var(--mute); text-transform: uppercase; letter-spacing: .1em; }
+.qq { font-size: 16px; color: var(--ink) !important; margin: 6px 0 12px !important; }
+.qops { display: grid; gap: 6px; }
+.qops button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); color: var(--ink); font: 500 14px var(--f-body); cursor: pointer; }
+.qops button i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.qops button:hover:not(:disabled) { border-color: var(--line-strong); background: rgba(255, 255, 255, .06); }
+.qops button.ok { border-color: var(--verde); background: rgba(93, 255, 154, .1); }
+.qops button.no { border-color: var(--laser); background: rgba(255, 106, 61, .1); }
+.qops button:disabled { cursor: default; }
+.qexp { margin: 12px 0; font-size: 14px; line-height: 1.5; color: #d3dcea; }
+.qfim { font-size: 17px; }
+
+/* laboratório */
+#lab { position: fixed; right: max(20px, env(safe-area-inset-right)); top: 64px; width: min(680px, calc(100vw - 470px)); background: var(--panel-solid); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, .45); }
+#lab header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 16px 10px; border-bottom: 1px solid var(--line); }
+#lab header b { font: 600 10px var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--foco); }
+#lab header span { font: 600 15px var(--f-disp); }
+#labc { display: block; width: 100%; aspect-ratio: 16 / 10; max-height: calc(100vh - 290px); cursor: crosshair; }
+#labctl { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+#labctl:empty { display: none; }
+.seg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.seg span { font: 500 10px var(--f-mono); color: var(--mute); text-transform: uppercase; letter-spacing: .1em; margin-right: 4px; }
+.seg button { padding: 6px 10px; border: 1px solid var(--line); background: transparent; color: var(--mute); border-radius: 7px; font: 500 12px var(--f-body); cursor: pointer; }
+.seg button:hover { color: var(--ink); border-color: var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: #08101e; border-color: var(--ink); }
+
+/* navegação */
+#pill { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 4px; padding: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); max-width: calc(100vw - 24px); }
+#pill button, #pill a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px; background: transparent; color: var(--mute); font: 500 12px var(--f-mono); cursor: pointer; text-decoration: none; }
+#pill button:hover:not(:disabled), #pill a:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
+#pill button:disabled { opacity: .3; cursor: default; }
+#pill svg { width: 16px; height: 16px; }
+#next { background: var(--ink) !important; color: #08101e !important; padding: 0 16px !important; }
+#next:hover:not(:disabled) { background: #fff !important; }
+.pmid { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 150px; padding: 0 10px; }
+#pilltitle { font: 600 13px var(--f-disp); color: var(--ink); white-space: nowrap; }
+#pilldots { display: flex; gap: 5px; }
+#pilldots i { width: 14px; height: 3px; border-radius: 2px; background: var(--line-strong); }
+#pilldots i.on { background: var(--foco); }
+#count { font: 500 11px var(--f-mono); color: var(--dim); padding: 0 6px; }
+.escala { position: fixed; left: max(20px, env(safe-area-inset-left)); bottom: max(22px, env(safe-area-inset-bottom)); font: 500 10px var(--f-mono); color: var(--dim); letter-spacing: .06em; max-width: 220px; line-height: 1.5; pointer-events: none; }
+
+/* menu */
+#menu { position: fixed; inset: 0; background: rgba(4, 7, 14, .72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: grid; place-items: center; padding: 20px; z-index: 5; }
+#menu .box { width: min(780px, 100%); max-height: calc(100% - 40px); overflow: auto; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+#menu h3 { margin: 0 0 14px; font: 600 12px var(--f-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--mute); }
+#menu .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+#menu .grid button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); color: var(--ink); cursor: pointer; }
+#menu .grid button:hover { border-color: var(--line-strong); background: rgba(255, 255, 255, .05); }
+#menu .n { font: 600 12px var(--f-mono); color: var(--dim); }
+#menu .t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+#menu .t b { font: 600 15px var(--f-disp); }
+#menu .t small { font: 400 12px var(--f-body); color: var(--mute); }
+#menu .grid i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+@media (max-width: 1180px) and (min-width: 861px) {
+  #card { width: 360px; }
+  #lab { width: calc(100vw - 420px); }
+}
+@media (max-width: 860px) {
+  body { font-size: 14px; }
+  #card { top: auto; bottom: 76px; left: 12px; right: 12px; width: auto; max-height: 44%; padding: 16px; }
+  #card h1.capa { font-size: 34px; }
+  #card h2 { font-size: 19px; }
+  #lab { left: 12px; right: 12px; top: 56px; width: auto; }
+  #labc { max-height: 30vh; }
+  #labctl { padding: 8px 10px; }
+  .escala { display: none; }
+  .pmid { min-width: 0; }
+  #count, .hide-sm { display: none !important; }
+  #top { padding-left: 14px; padding-right: 14px; }
+  .brand small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { #card.in > * { animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Cena 3D da Terra com satélites em órbita"></canvas>
+<svg id="lines" aria-hidden="true"></svg>
+<div id="labels"><div class="ann" id="annAlt" hidden></div><div class="ann" id="annSw" hidden></div></div>
+
+<header id="top">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="5.2"/><ellipse cx="12" cy="12" rx="10.5" ry="4" transform="rotate(-28 12 12)"/><circle cx="20.6" cy="7.6" r="1.4" fill="#ffc94a" stroke="none"/></svg>
+    Atlas Orbital <small>Sensoriamento remoto da vegetação</small>
+  </div>
+  <button class="iconbtn" id="fs" type="button" title="Tela cheia">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="hide-sm">Tela cheia</span>
+  </button>
+</header>
+
+<section id="card" aria-live="polite"></section>
+
+<section id="lab" hidden>
+  <header><b>Laboratório</b><span id="labtitle"></span></header>
+  <canvas id="labc"></canvas>
+  <div id="labctl"></div>
+</section>
+
+<p class="escala">Altitudes das órbitas em escala real. Satélites e feixes fora de escala.</p>
+
+<nav id="pill" aria-label="Navegação da aula">
+  <button id="menubtn" type="button" aria-expanded="false" title="Capítulos (M)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="hide-sm">Capítulos</span>
+  </button>
+  <button id="prev" type="button" title="Voltar (←)" aria-label="Passo anterior">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="pmid"><span id="pilltitle"></span><span id="pilldots"></span></div>
+  <span id="count"></span>
+  <button id="next" type="button" title="Avançar (→)" aria-label="Próximo passo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+  <a href="professor.html" target="_blank" rel="noopener" title="Notas do professor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h11a3 3 0 0 1 3 3v12H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h6"/></svg><span class="hide-sm">Professor</span>
+  </a>
+</nav>
+
+<div id="menu" hidden>
+  <div class="box" role="dialog" aria-label="Capítulos">
+    <h3>Capítulos da aula</h3>
+    <div class="grid"></div>
+  </div>
+</div>
+
+<!-- build:three -->
+<script src="lib/three.min.js"></script>
+<!-- build:texturas -->
+<script>/* aberto direto do disco (file://): o WebGL só aceita as texturas embutidas */
+if (location.protocol === 'file:') document.write('<script src="assets/texturas.js"><\/script>');</script>
+<!-- build:app -->
+<script src="js/conteudo.js"></script>
+<script src="js/modelos.js"></script>
+<script src="js/labs.js"></script>
+<script src="js/app.js"></script>
+<!-- /build -->
+</body>
+</html>
