@@ -574,6 +574,8 @@
   new MutationObserver(() => { viewOffTo = computeViewOff(); }).observe(labEl, { attributes: true, attributeFilter: ['hidden'] });
   const ro = new ResizeObserver(() => { viewOffTo = computeViewOff(); sizeLab(); }); ro.observe(card); ro.observe(labEl);
   if (Q.has('instant')) { viewOffTo = computeViewOff(); for (let i = 0; i < 90; i++) tick(.05); }
-  requestAnimationFrame(frame);
+  if (Q.has('video')) { // gravação quadro a quadro: o gravador controla o tempo
+    Object.assign(window, { __tick: tick, __go: go, __goCap: goCap, __ready: true });
+  } else requestAnimationFrame(frame);
   addEventListener('hashchange', () => { const h = location.hash.slice(1); const s = STEPS[cur]; if (s && s.cap.id !== h) goCap(h); });
 })();

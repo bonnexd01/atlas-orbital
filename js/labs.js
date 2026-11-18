@@ -543,7 +543,7 @@
       const xs = [14, 14 + pw + 21, 14 + 2 * (pw + 21)];
       g.imageSmoothingEnabled = false;
       // 1. imagem + pegadas
-      label(g, 'ENTRADA', xs[0], y0 - 26, C.ink, MONO); label(g, 'Sentinel-2 (falsa-cor) + pegadas GEDI', xs[0], y0 - 12, C.mute, MONO_S);
+      label(g, 'ENTRADA', xs[0], y0 - 26, C.ink, MONO); label(g, 'Sentinel-2 + pegadas GEDI', xs[0], y0 - 12, C.mute, MONO_S);
       g.drawImage(s.img, xs[0], y0, pw, ph);
       const nShots = st === 0 ? Math.floor(clamp(tt / 3) * s.shots.length) : s.shots.length;
       for (let i = 0; i < nShots; i++) { const q = s.shots[i]; g.fillStyle = ramp(q.h); g.strokeStyle = '#0a1020'; g.lineWidth = 1; g.beginPath(); g.arc(xs[0] + (q.x + .5) / L.W * pw, y0 + (q.y + .5) / L.H * ph, 2.6, 0, 7); g.fill(); g.stroke(); }
@@ -578,7 +578,7 @@
         label(g, 'Erro maior na mata alta (subestima) e em vegetação baixa e aberta.', 14, ly + 9, C.ink, MONO);
       }
       // dispersão: altura medida pelo GEDI × altura prevista
-      const sy0 = ly + 50, sz = Math.min(h - sy0 - 40, 200);
+      const sy0 = ly + 46, sz = Math.min(h - sy0 - 34, 200);
       if (st >= 2 && sz > 80) {
         const sx0 = 54, M = 34, PX = v => sx0 + v / M * sz, PY = v => sy0 + sz - v / M * sz;
         g.strokeStyle = C.axis; g.lineWidth = 1; g.beginPath(); g.moveTo(sx0, sy0); g.lineTo(sx0, sy0 + sz); g.lineTo(sx0 + sz, sy0 + sz); g.stroke();
@@ -597,7 +597,8 @@
         label(g, 'o modelo subestima (saturação).', tx, sy0 + 88, C.ink, MONO_S);
         label(g, 'Vegetação baixa fica acima da linha.', tx, sy0 + 112, C.mute, MONO_S);
       }
-      label(g, ['Pegadas: amostras de altura medidas pelo lidar', 'A rede aprende com as pegadas e preenche o resto', 'Resultado: altura em todos os pixels', 'Validação: compare com lidar aéreo ou parcelas de campo'][st], 14, h - 14, C.mute, MONO);
+      if (!(st >= 2 && Math.min(h - (ly + 46) - 34, 200) > 80)) // com a dispersão, o rodapé sairia por cima dela
+        label(g, ['Pegadas: amostras de altura medidas pelo lidar', 'A rede aprende com as pegadas e preenche o resto', 'Resultado: altura em todos os pixels', 'Validação: compare com lidar aéreo ou parcelas de campo'][st], 14, h - 14, C.mute, MONO);
     }
   };
 
